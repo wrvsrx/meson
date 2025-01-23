@@ -975,9 +975,12 @@ def run(options: argparse.Namespace) -> int:
 
     sources: T.List[Path] = options.sources.copy() or [Path(build_filename)]
     if not options.configuration:
-        default_config_path = sources[0].parent / 'meson.format'
-        if default_config_path.exists():
-            options.configuration = default_config_path
+        current_path = Path.cwd()
+        for parent in [current_path] + list(current_path.parents):
+            target = parent / 'meson.format'
+            if target.exists() and target.is_file():
+                options.configuration = target
+
     formatter = Formatter(options.configuration, options.editor_config, options.recursive)
 
     while sources:
