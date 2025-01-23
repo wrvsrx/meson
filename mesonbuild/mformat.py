@@ -974,11 +974,6 @@ def run(options: argparse.Namespace) -> int:
         raise MesonException('--inplace argument is not compatible with stdin input')
 
     sources: T.List[Path] = options.sources.copy() or [Path(build_filename)]
-    if not options.configuration:
-        default_config_path = sources[0].parent / 'meson.format'
-        if default_config_path.exists():
-            options.configuration = default_config_path
-    formatter = Formatter(options.configuration, options.editor_config, options.recursive)
 
     while sources:
         src_file = sources.pop(0)
@@ -993,6 +988,21 @@ def run(options: argparse.Namespace) -> int:
                 code = src_file.read_text(encoding='utf-8')
         except IOError as e:
             raise MesonException(f'Unable to read from {src_file}') from e
+
+        configuration : T.Optional[Path] = None
+        if options.configuration:
+            configuration = options.configuration
+        else:
+            configuration = None
+            # When src_file is STDIN, we will search for meson.format from the current directory
+            for parent in src_file.resolve().parents:
+                target = parent / 'meson.format'
+                print(target)
+                if target.exists() and target.is_file():
+                    configuration = target
+                    break
+
+        formatter = Formatter(configuration, options.editor_config, options.recursive)
 
         formatted = formatter.format(code, src_file)
         if options.recursive:
