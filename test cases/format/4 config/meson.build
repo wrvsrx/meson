@@ -14,6 +14,6 @@ foreach name, f : meson_files
   test(
     name,
     meson_cmd,
-    args : [ 'format', '--check-only', f ],
+    args : [ 'format', '--check-only', f],
   )
 endforeach
