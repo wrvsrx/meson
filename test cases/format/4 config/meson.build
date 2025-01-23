@@ -4,6 +4,7 @@
 project('default format')
 
 meson_cmd = find_program('meson')
+meson_format = files('meson.format')
 meson_files = {
   'self' : files('meson.build'),
   'comments' : files('crazy_comments.meson'),
@@ -14,6 +15,6 @@ foreach name, f : meson_files
   test(
     name,
     meson_cmd,
-    args : [ 'format', '--check-only', f ],
+    args : [ 'format', '--check-only', f, '--configuration', meson_format ],
   )
 endforeach
